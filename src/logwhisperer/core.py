@@ -1,3 +1,10 @@
+"""Core analysis pipeline: normalize, cluster, diff against DB, and report.
+
+This module ties together normalization, severity classification, and the
+persistent pattern database to produce a report of observed patterns with
+NEW/seen tags and optional alert items for notification dispatch.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -12,6 +19,7 @@ from .report import Report, ReportItem
 
 @dataclass
 class WindowPattern:
+    """Aggregated pattern data from the current analysis window (one run)."""
     h: str
     pattern: str
     count: int
@@ -20,6 +28,11 @@ class WindowPattern:
 
 
 def cluster(lines: Iterable[str]) -> Dict[str, WindowPattern]:
+    """Normalize and group raw log lines into deduplicated patterns.
+
+    Each unique normalized pattern gets a count, severity, and one raw
+    sample line. Returns a dict keyed by pattern hash.
+    """
     counts: Dict[str, int] = {}
     patterns: Dict[str, str] = {}
     samples: Dict[str, str] = {}
@@ -33,7 +46,7 @@ def cluster(lines: Iterable[str]) -> Dict[str, WindowPattern]:
         h = pattern_hash(pat)
         counts[h] = counts.get(h, 0) + 1
         patterns[h] = pat
-        samples.setdefault(h, raw)
+        samples.setdefault(h, raw)  # keep the first occurrence as sample
         severities[h] = severity_of(pat)
 
     out: Dict[str, WindowPattern] = {}
@@ -58,6 +71,17 @@ def build_report(
     show_new_only: bool,
     min_severity: str,
 ) -> Tuple[Report, List[ReportItem], bool]:
+    """Diff the current window against the DB and produce a report.
+
+    For each pattern in the window:
+      1. Check if it already exists in the DB (seen vs NEW).
+      2. Update cumulative counts in the DB regardless of filters.
+      3. Build report items honoring ``show_new_only`` and ``min_severity``.
+      4. Collect alert-worthy items (NEW patterns outside baseline mode).
+
+    Returns:
+        A 3-tuple of (report, alerted_items, baseline_active).
+    """
     db = PatternDB(db_path)
     records = db.load()
     now = now_epoch()
@@ -68,6 +92,7 @@ def build_report(
     severity_rank = {"INFO": 0, "WARN": 1, "ERROR": 2}
     min_rank = severity_rank.get(min_severity, 0)
 
+    # Show highest-count patterns first in the report
     items_sorted = sorted(window.values(), key=lambda w: w.count, reverse=True)
 
     report_items: List[ReportItem] = []
@@ -78,7 +103,7 @@ def build_report(
         is_new = old is None
 
         if severity_rank.get(w.severity, 0) < min_rank:
-            # still update DB
+            # Below severity threshold — update DB silently, skip report
             if old is None:
                 records[w.h] = PatternRecord(
                     h=w.h,
@@ -96,6 +121,7 @@ def build_report(
             continue
 
         if show_new_only and not is_new:
+            # User only wants NEW patterns — update DB, skip report
             old.last_seen = now
             old.total_seen += w.count
             records[w.h] = old
@@ -135,6 +161,7 @@ def build_report(
         )
         report_items.append(item)
 
+        # Only alert on NEW patterns when baseline learning is inactive
         if (not baseline_active) and (tag == "NEW"):
             alerted_items.append(item)
 
@@ -156,6 +183,7 @@ def build_report(
 
 
 def format_alert_message(report: Report, alerted: List[ReportItem], max_items: int = 10) -> str:
+    """Build a plain-text alert message for notification dispatch."""
     lines: List[str] = []
     lines.append(f"Log Whisperer ALERT ({len(alerted)} new patterns)")
     lines.append(f"Source: {report.source} | since={report.since}")

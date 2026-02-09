@@ -1,3 +1,9 @@
+"""CLI entry point for LogWhisperer.
+
+Parses arguments, orchestrates the read -> cluster -> report pipeline,
+and dispatches notifications when new patterns are detected.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -15,6 +21,7 @@ from .state import BaselineState, PatternDB, parse_duration, fmt_local_ts
 
 
 def parse_args(argv=None) -> argparse.Namespace:
+    """Build the argument parser and return parsed arguments."""
     parser = argparse.ArgumentParser(
         prog="log-whisperer",
         description="Cluster logs into patterns, detect new patterns, and optionally notify.",
@@ -64,6 +71,7 @@ def parse_args(argv=None) -> argparse.Namespace:
 
 
 def main(argv=None) -> None:
+    """Entry point: read logs, cluster patterns, report results, notify."""
     args = parse_args(argv)
 
     db_path = Path(args.state_db)

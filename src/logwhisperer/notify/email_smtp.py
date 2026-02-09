@@ -1,3 +1,5 @@
+"""Send alert emails via SMTP (with optional STARTTLS)."""
+
 from __future__ import annotations
 
 import smtplib
@@ -15,6 +17,11 @@ def notify_email_smtp(
     body: str,
     use_tls: bool = True,
 ) -> None:
+    """Send a plain-text email from *sender* to *recipient* via SMTP.
+
+    Connects to *host*:*port*, optionally upgrades to TLS with STARTTLS,
+    and authenticates if *username* is non-empty.
+    """
     msg = EmailMessage()
     msg["From"] = sender
     msg["To"] = recipient

@@ -1,3 +1,5 @@
+"""Report data structures and output formatters (text and JSON)."""
+
 from __future__ import annotations
 
 import json
@@ -8,6 +10,17 @@ from typing import List
 
 @dataclass
 class ReportItem:
+    """One pattern entry in the analysis report.
+
+    Attributes:
+        tag: ``"NEW"`` if the pattern was never seen before, ``"seen"`` otherwise.
+        count_window: How many times this pattern appeared in the current window.
+        total_seen: Cumulative count across all runs (from the DB).
+        severity: Classified severity level.
+        pattern: Normalized pattern string with placeholders.
+        sample: One raw log line that produced this pattern.
+        hash: SHA-1 hash identifying this pattern.
+    """
     tag: str
     count_window: int
     total_seen: int
@@ -19,6 +32,7 @@ class ReportItem:
 
 @dataclass
 class Report:
+    """Top-level report container with metadata and pattern items."""
     source: str
     since: str
     lines_limit: int
@@ -30,6 +44,7 @@ class Report:
 
 
 def print_text_report(report: Report, show_samples: bool) -> None:
+    """Print a human-readable report to stdout."""
     print("\n=== Log Whisperer Report ===")
     print(f"Source: {report.source} | since={report.since} | lines<={report.lines_limit}")
     print(f"State: {report.state_db}")
@@ -53,4 +68,5 @@ def print_text_report(report: Report, show_samples: bool) -> None:
 
 
 def report_to_json(report: Report) -> str:
+    """Serialize the full report to a pretty-printed JSON string."""
     return json.dumps(asdict(report), indent=2)

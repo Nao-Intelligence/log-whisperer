@@ -1,3 +1,5 @@
+"""Log source dispatcher — routes CLI args to the appropriate reader."""
+
 from __future__ import annotations
 
 from typing import List, Tuple
@@ -9,8 +11,15 @@ from .file import read_file
 
 
 def read_lines(args) -> Tuple[List[str], str]:
-    """
-    Returns (lines, src_desc)
+    """Dispatch to the correct log source based on parsed CLI arguments.
+
+    Returns:
+        A tuple of ``(lines, source_description)`` where *lines* is a list
+        of raw log strings and *source_description* identifies the source
+        for report metadata (e.g. ``"docker:myapp"``).
+
+    Raises:
+        RuntimeError: If no source flag was set on *args*.
     """
     if args.docker:
         return read_docker(args.docker, args.since, args.lines), f"docker:{args.docker}"

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "logwhisperer"
+version = "0.2.0"
+description = "CLI log pattern analysis tool"
+requires-python = ">=3.9"
+dependencies = ["requests"]
+
+[project.scripts]
+log-whisperer = "logwhisperer.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

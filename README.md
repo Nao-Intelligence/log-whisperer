@@ -6,7 +6,9 @@
 
 <p align="center">
   <b>CLI log pattern analysis &amp; anomaly detection tool</b><br>
-  <code>v0.2.0</code>
+  <a href="https://pypi.org/project/logwhisperer/"><img src="https://img.shields.io/pypi/v/logwhisperer" alt="PyPI"></a>
+  <a href="https://pypi.org/project/logwhisperer/"><img src="https://img.shields.io/pypi/pyversions/logwhisperer" alt="Python versions"></a>
+  <a href="https://github.com/naointelligence/logwhisperer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/logwhisperer" alt="License"></a>
 </p>
 
 <p align="center">
@@ -46,18 +48,26 @@ are **new**.
 
 ## Installation
 
-### With pipx (recommended)
+### From PyPI (recommended)
 
 ```bash
-pipx install .
+pip install logwhisperer
 ```
 
-### With pip in a virtualenv
+Or with [pipx](https://pipx.pypa.io/) for an isolated install:
 
 ```bash
+pipx install logwhisperer
+```
+
+### From source (development)
+
+```bash
+git clone https://github.com/naointelligence/logwhisperer.git
+cd logwhisperer
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
+pip install -e ".[dev]"
 ```
 
 ### Verify
@@ -600,5 +610,5 @@ log-whisperer --file /var/log/app.log --baseline-learn 1h
 ---
 
 <p align="center">
-  <sub>LogWhisperer v0.2.0 &mdash; Built with Python 3.9+</sub>
+  <sub>LogWhisperer &mdash; Built with Python 3.9+</sub>
 </p>

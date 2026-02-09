@@ -143,16 +143,16 @@ log-whisperer [SOURCE] [OPTIONS]
 
 | Flag | Env Variable | Description |
 |:-----|:-------------|:------------|
-| `--notify-ntfy-topic` | `LOGWHISPER_NTFY_TOPIC` | ntfy topic name |
-| `--notify-ntfy-server` | `LOGWHISPER_NTFY_SERVER` | ntfy server URL (default: `https://ntfy.sh`) |
-| `--notify-telegram-token` | `LOGWHISPER_TELEGRAM_TOKEN` | Telegram bot token |
-| `--notify-telegram-chat-id` | `LOGWHISPER_TELEGRAM_CHAT_ID` | Telegram chat ID |
-| `--notify-email-host` | `LOGWHISPER_SMTP_HOST` | SMTP server hostname |
-| `--notify-email-port` | `LOGWHISPER_SMTP_PORT` | SMTP port (default: `587`) |
-| `--notify-email-user` | `LOGWHISPER_SMTP_USER` | SMTP username |
-| `--notify-email-pass` | `LOGWHISPER_SMTP_PASS` | SMTP password |
-| `--notify-email-from` | `LOGWHISPER_EMAIL_FROM` | Sender email address |
-| `--notify-email-to` | `LOGWHISPER_EMAIL_TO` | Recipient email address |
+| `--notify-ntfy-topic` | `LOGWHISPERER_NTFY_TOPIC` | ntfy topic name |
+| `--notify-ntfy-server` | `LOGWHISPERER_NTFY_SERVER` | ntfy server URL (default: `https://ntfy.sh`) |
+| `--notify-telegram-token` | `LOGWHISPERER_TELEGRAM_TOKEN` | Telegram bot token |
+| `--notify-telegram-chat-id` | `LOGWHISPERER_TELEGRAM_CHAT_ID` | Telegram chat ID |
+| `--notify-email-host` | `LOGWHISPERER_SMTP_HOST` | SMTP server hostname |
+| `--notify-email-port` | `LOGWHISPERER_SMTP_PORT` | SMTP port (default: `587`) |
+| `--notify-email-user` | `LOGWHISPERER_SMTP_USER` | SMTP username |
+| `--notify-email-pass` | `LOGWHISPERER_SMTP_PASS` | SMTP password |
+| `--notify-email-from` | `LOGWHISPERER_EMAIL_FROM` | Sender email address |
+| `--notify-email-to` | `LOGWHISPERER_EMAIL_TO` | Recipient email address |
 | `--notify-email-no-tls` | — | Disable STARTTLS |
 
 ---
@@ -364,7 +364,7 @@ log-whisperer --file app.log \
 Or via environment variables:
 
 ```bash
-export LOGWHISPER_NTFY_TOPIC=my-alerts
+export LOGWHISPERER_NTFY_TOPIC=my-alerts
 log-whisperer --file app.log
 ```
 
@@ -379,8 +379,8 @@ log-whisperer --file app.log \
 Or via environment:
 
 ```bash
-export LOGWHISPER_TELEGRAM_TOKEN="123456:ABC-DEF..."
-export LOGWHISPER_TELEGRAM_CHAT_ID="-100123456789"
+export LOGWHISPERER_TELEGRAM_TOKEN="123456:ABC-DEF..."
+export LOGWHISPERER_TELEGRAM_CHAT_ID="-100123456789"
 ```
 
 ### Email (SMTP)
@@ -531,16 +531,16 @@ appear in process listings or shell history:
 
 | Variable | Maps To |
 |:---------|:--------|
-| `LOGWHISPER_NTFY_TOPIC` | `--notify-ntfy-topic` |
-| `LOGWHISPER_NTFY_SERVER` | `--notify-ntfy-server` |
-| `LOGWHISPER_TELEGRAM_TOKEN` | `--notify-telegram-token` |
-| `LOGWHISPER_TELEGRAM_CHAT_ID` | `--notify-telegram-chat-id` |
-| `LOGWHISPER_SMTP_HOST` | `--notify-email-host` |
-| `LOGWHISPER_SMTP_PORT` | `--notify-email-port` |
-| `LOGWHISPER_SMTP_USER` | `--notify-email-user` |
-| `LOGWHISPER_SMTP_PASS` | `--notify-email-pass` |
-| `LOGWHISPER_EMAIL_FROM` | `--notify-email-from` |
-| `LOGWHISPER_EMAIL_TO` | `--notify-email-to` |
+| `LOGWHISPERER_NTFY_TOPIC` | `--notify-ntfy-topic` |
+| `LOGWHISPERER_NTFY_SERVER` | `--notify-ntfy-server` |
+| `LOGWHISPERER_TELEGRAM_TOKEN` | `--notify-telegram-token` |
+| `LOGWHISPERER_TELEGRAM_CHAT_ID` | `--notify-telegram-chat-id` |
+| `LOGWHISPERER_SMTP_HOST` | `--notify-email-host` |
+| `LOGWHISPERER_SMTP_PORT` | `--notify-email-port` |
+| `LOGWHISPERER_SMTP_USER` | `--notify-email-user` |
+| `LOGWHISPERER_SMTP_PASS` | `--notify-email-pass` |
+| `LOGWHISPERER_EMAIL_FROM` | `--notify-email-from` |
+| `LOGWHISPERER_EMAIL_TO` | `--notify-email-to` |
 | `XDG_STATE_HOME` | Base directory for state files (default: `~/.local/state`) |
 
 ---

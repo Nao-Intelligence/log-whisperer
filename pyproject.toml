@@ -5,9 +5,41 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "logwhisperer"
 version = "0.2.0"
-description = "CLI log pattern analysis tool"
+description = "CLI log pattern analysis and anomaly detection tool"
 requires-python = ">=3.9"
 dependencies = ["requests"]
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Nao Intelligence GmbH", email = "pranto@naointelligence.com"},
+]
+keywords = ["logging", "log-analysis", "pattern-detection", "anomaly-detection", "cli", "devops", "monitoring"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Logging",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Systems Administration",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.urls]
+Homepage = "https://github.com/naointelligence/logwhisperer"
+Repository = "https://github.com/naointelligence/logwhisperer"
+Issues = "https://github.com/naointelligence/logwhisperer/issues"
 
 [project.scripts]
 log-whisperer = "logwhisperer.cli:main"

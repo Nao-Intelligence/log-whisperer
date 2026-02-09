@@ -1,0 +1,131 @@
+name: CD
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Determine version bump
+        id: version
+        run: |
+          # Read current version from pyproject.toml
+          CURRENT=$(grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          echo "Current version: $CURRENT"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+          # Extract branch name and its prefix (everything before the first -)
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          PREFIX="${BRANCH%%-*}"
+          echo "Branch: $BRANCH"
+          echo "Prefix: $PREFIX"
+
+          # Determine bump type from prefix
+          case "$PREFIX" in
+            feat|feature)
+              BUMP="minor"
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            breaking|major)
+              BUMP="major"
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            fix|bugfix|hotfix)
+              BUMP="patch"
+              PATCH=$((PATCH + 1))
+              ;;
+            *)
+              BUMP="patch"
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Bump type: $BUMP"
+          echo "New version: $NEW_VERSION"
+
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "new=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          echo "tag=v${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Bump version in source files
+        run: |
+          sed -i 's/^version = ".*"/version = "${{ steps.version.outputs.new }}"/' pyproject.toml
+          sed -i 's/^__version__ = ".*"/__version__ = "${{ steps.version.outputs.new }}"/' src/logwhisperer/__init__.py
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Find the latest tag, or use initial commit if none exists
+          if git describe --tags --abbrev=0 HEAD 2>/dev/null; then
+            LAST_TAG=$(git describe --tags --abbrev=0 HEAD)
+            RANGE="${LAST_TAG}..HEAD"
+          else
+            RANGE="HEAD"
+          fi
+
+          echo "Log range: $RANGE"
+
+          {
+            echo "changelog<<CHANGELOG_EOF"
+            echo "## What's Changed"
+            echo ""
+            if [ "$RANGE" = "HEAD" ]; then
+              git log --pretty=format:"- %s (%an)" HEAD
+            else
+              git log --pretty=format:"- %s (%an)" "$RANGE"
+            fi
+            echo ""
+            echo ""
+            echo "**Full Changelog**: ${{ github.event.pull_request.html_url }}"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit version bump and create tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml src/logwhisperer/__init__.py
+          git commit -m "chore: bump version to ${{ steps.version.outputs.new }}"
+          git tag "${{ steps.version.outputs.tag }}"
+          git push origin main --follow-tags
+
+      - name: Build package
+        run: python -m build
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" dist/* \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes "${{ steps.changelog.outputs.changelog }}"
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

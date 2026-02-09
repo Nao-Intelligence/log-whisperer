@@ -14,3 +14,6 @@ log-whisperer = "logwhisperer.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.data-files]
+"share/man/man1" = ["man/log-whisperer.1"]

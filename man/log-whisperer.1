@@ -1,0 +1,581 @@
+.\" Man page for log-whisperer(1)
+.\" Generated for LogWhisperer v0.2.0
+.\"
+.TH LOG-WHISPERER 1 "February 2026" "LogWhisperer 0.2.0" "User Commands"
+.\"
+.\" ===================================================================
+.\"  NAME
+.\" ===================================================================
+.SH NAME
+log\-whisperer \- CLI log pattern analysis and anomaly detection tool
+.\"
+.\" ===================================================================
+.\"  SYNOPSIS
+.\" ===================================================================
+.SH SYNOPSIS
+.B log\-whisperer
+.RB [ \-\-file
+.IR PATH ]
+.RB [ \-\-docker
+.IR CONTAINER ]
+.RB [ \-\-compose
+.IR SERVICE ]
+.RB [ \-\-compose\-all ]
+.RB [ \-\-service
+.IR UNIT ]
+.br
+.RS 16
+.RB [ \-\-since
+.IR WINDOW ]
+.RB [ \-\-lines
+.IR N ]
+.RB [ \-\-show\-new ]
+.RB [ \-\-show\-samples ]
+.br
+.RB [ \-\-min\-severity
+.IR LEVEL ]
+.RB [ \-\-json ]
+.br
+.RB [ \-\-state\-db
+.IR PATH ]
+.RB [ \-\-baseline\-state
+.IR PATH ]
+.br
+.RB [ \-\-baseline\-learn
+.IR DURATION ]
+.RB [ \-\-reset ]
+.br
+.RB [ \-\-notify\-ntfy\-topic
+.IR TOPIC ]
+.RB [ \-\-notify\-telegram\-token
+.IR TOKEN ]
+.br
+.RB [ \-\-notify\-email\-host
+.IR HOST ]
+\fR...
+.RE
+.\"
+.\" ===================================================================
+.\"  DESCRIPTION
+.\" ===================================================================
+.SH DESCRIPTION
+.B log\-whisperer
+reads log lines from a configured source (Docker container, Docker Compose
+service, systemd journal unit, or plain text file), normalizes variable data
+out of each line (IP addresses, UUIDs, timestamps, file paths, numbers),
+clusters the normalized lines into deduplicated patterns, and compares them
+against a persistent database of previously seen patterns.
+.PP
+Patterns that have never been seen before are tagged
+.B [NEW]
+and can optionally trigger alert notifications via ntfy, Telegram, or email.
+Previously seen patterns are tagged
+.BR [seen] .
+.PP
+The tool is designed to be run periodically (e.g.\& via
+.BR cron (8))
+to detect anomalous log activity \(em new error patterns, unexpected warnings,
+or any log message structure that hasn't appeared before.
+.\"
+.\" ===================================================================
+.\"  PIPELINE
+.\" ===================================================================
+.SH PIPELINE
+The analysis pipeline consists of four stages:
+.PP
+.RS 2
+.IP 1. 4
+.B Read
+\(em Fetch raw log lines from the configured source, limited to the last
+.B \-\-lines
+entries.
+.IP 2. 4
+.B Normalize
+\(em Strip timestamp prefixes and replace variable tokens (IPs, UUIDs, hashes,
+MAC addresses, hex literals, file paths, numbers) with stable placeholders
+.RB ( <IP> ", " <UUID> ", " <HASH> ", " <MAC> ", " <HEX> ", " <PATH> ", " <N> ).
+.IP 3. 4
+.B Cluster
+\(em Group identical normalized patterns, counting occurrences and classifying
+severity (ERROR, WARN, INFO) by keyword matching.
+.IP 4. 4
+.B Diff
+\(em Compare the current window's patterns against the persistent JSON\-lines
+database to determine which are
+.B [NEW]
+and which are
+.BR [seen] .
+Update the database with new counts and timestamps.
+.RE
+.\"
+.\" ===================================================================
+.\"  OPTIONS
+.\" ===================================================================
+.SH OPTIONS
+.\" --- Sources ---
+.SS Source Selection
+Exactly one source must be specified (unless
+.B \-\-reset
+is used).
+.TP
+.BI \-\-file " PATH"
+Read the last
+.B \-\-lines
+lines from the plain text file at
+.IR PATH .
+No external tools are required.
+.TP
+.BI \-\-docker " CONTAINER"
+Fetch logs from a Docker container via
+.BR "docker logs" .
+The
+.B \-\-since
+value is passed directly to Docker.
+.TP
+.BI \-\-compose " SERVICE"
+Fetch logs from a single Docker Compose service via
+.BR "docker compose logs" .
+Colour output is disabled automatically.
+.TP
+.B \-\-compose\-all
+Fetch logs from
+.B all
+Docker Compose services in the current project.
+.TP
+.BI \-\-service " UNIT"
+Fetch logs from a systemd journal unit via
+.BR journalctl (1).
+Uses
+.B \-o cat
+for bare message output without journal metadata.
+.\" --- Display ---
+.SS Display Options
+.TP
+.B \-\-show\-samples
+Print one raw (un\-normalized) sample log line below each pattern in the
+text report.
+.TP
+.B \-\-show\-new
+Only display patterns that have never been seen before.
+Previously seen patterns are still recorded in the database but omitted
+from the report output.
+.TP
+.BI \-\-min\-severity " LEVEL"
+Filter the report to show only patterns at or above the given severity.
+Valid values:
+.BR INFO " (default), " WARN ", " ERROR .
+Patterns below the threshold are still recorded in the database.
+.TP
+.B \-\-json
+Output the full report as a JSON object to stdout.
+The database is still updated as normal.
+.\" --- Window ---
+.SS Window Options
+.TP
+.BI \-\-since " WINDOW"
+Time window for log retrieval.
+Passed directly to
+.BR "docker logs" " or " journalctl (1).
+For file sources, this value is recorded in the report metadata but all
+lines in the file are read regardless.
+.br
+Default:
+.BR 1h .
+Examples:
+.BR 10m ", " 1h ", " today .
+.TP
+.BI \-\-lines " N"
+Maximum number of log lines to process (taken from the tail of the output).
+.br
+Default:
+.BR 5000 .
+.\" --- State ---
+.SS State Management
+.TP
+.BI \-\-state\-db " PATH"
+Path to the pattern database file (JSON\-lines format).
+.br
+Default:
+.BR ~/.local/state/logwhisperer/patterns.db .
+.TP
+.BI \-\-baseline\-state " PATH"
+Path to the baseline learning state file (JSON).
+.br
+Default:
+.BR ~/.local/state/logwhisperer/baseline.json .
+.TP
+.BI \-\-baseline\-learn " DURATION"
+Activate baseline learning mode for
+.IR DURATION .
+During this period, new patterns are recorded in the database but no alert
+notifications are dispatched.
+.br
+Accepted formats:
+.BR 30s ", " 10m ", " 2h ", " 1d .
+.TP
+.B \-\-reset
+Delete the pattern database and baseline state files, then exit.
+A source flag must still be provided (use
+.B \-\-file /dev/null
+if no real source is needed).
+.\" --- Notifications ---
+.SS Notification Options
+Notifications are sent only when new patterns are detected outside of
+baseline learning mode.
+All settings can also be configured via environment variables
+(see
+.BR "ENVIRONMENT" ).
+.TP
+.BI \-\-notify\-ntfy\-topic " TOPIC"
+Publish alerts to the given
+.BR ntfy (1)
+topic.
+.TP
+.BI \-\-notify\-ntfy\-server " URL"
+ntfy server URL.
+.br
+Default:
+.BR https://ntfy.sh .
+.TP
+.BI \-\-notify\-telegram\-token " TOKEN"
+Telegram Bot API token.
+.TP
+.BI \-\-notify\-telegram\-chat\-id " CHAT_ID"
+Telegram chat ID to send alerts to.
+.TP
+.BI \-\-notify\-email\-host " HOST"
+SMTP server hostname.
+.TP
+.BI \-\-notify\-email\-port " PORT"
+SMTP server port.
+.br
+Default:
+.BR 587 .
+.TP
+.BI \-\-notify\-email\-user " USERNAME"
+SMTP authentication username.
+.TP
+.BI \-\-notify\-email\-pass " PASSWORD"
+SMTP authentication password.
+.TP
+.BI \-\-notify\-email\-from " ADDRESS"
+Sender email address.
+.TP
+.BI \-\-notify\-email\-to " ADDRESS"
+Recipient email address.
+.TP
+.B \-\-notify\-email\-no\-tls
+Disable STARTTLS when connecting to the SMTP server.
+Useful for local or internal mail relays.
+.\"
+.\" ===================================================================
+.\"  NORMALISATION
+.\" ===================================================================
+.SH NORMALISATION
+The normalizer applies substitutions in a specific order to prevent partial
+matches.
+UUIDs and long hex hashes are replaced before the generic number pattern.
+.PP
+.TS
+l l l .
+\fBData Type\fR	\fBExample\fR	\fBPlaceholder\fR
+_
+ISO timestamp prefix	2024\-03\-15T10:23:45	\fI(stripped)\fR
+Syslog prefix	Mar 15 10:23:45 host app:	\fI(stripped)\fR
+UUID	550e8400\-e29b\-41d4\-...	<UUID>
+Hash (32\-64 hex)	d41d8cd98f00b204...	<HASH>
+IPv4 address	192.168.1.42	<IP>
+MAC address	aa:bb:cc:dd:ee:ff	<MAC>
+Hex literal	0x1A2F	<HEX>
+File path	/usr/local/bin/app	<PATH>
+Number	42, 3000	<N>
+.TE
+.PP
+After all substitutions, consecutive whitespace is collapsed to a single space
+and the result is trimmed.
+The normalized string is then hashed with SHA\-1 to produce a stable pattern
+identifier.
+.\"
+.\" ===================================================================
+.\"  SEVERITY CLASSIFICATION
+.\" ===================================================================
+.SH SEVERITY CLASSIFICATION
+Each pattern is classified by scanning (case\-insensitively) for keywords:
+.PP
+.B ERROR\fR:
+error, fatal, exception, traceback, panic, segfault, failed, failure, critical.
+.PP
+.B WARN\fR:
+warn, warning, timeout, timed out, retry, throttle, rate limit, deprecated,
+slow, unavailable.
+.PP
+.B INFO\fR:
+Everything else.
+.PP
+ERROR takes precedence over WARN.
+.\"
+.\" ===================================================================
+.\"  DATABASE FORMAT
+.\" ===================================================================
+.SH DATABASE FORMAT
+The pattern database uses a JSON\-lines format \(em one JSON object per line.
+Each entry contains:
+.PP
+.RS 2
+.nf
+{
+  "h": "<sha1\-hash>",
+  "first_seen": <epoch>,
+  "last_seen": <epoch>,
+  "total_seen": <count>,
+  "severity": "ERROR|WARN|INFO",
+  "pattern": "<normalized pattern>",
+  "sample": "<raw log line>"
+}
+.fi
+.RE
+.PP
+The database file is protected by
+.BR fcntl (2)
+file locks:
+shared locks (\fBLOCK_SH\fR) for reads and exclusive locks (\fBLOCK_EX\fR)
+for writes.
+This prevents corruption when concurrent instances (e.g.\& overlapping cron
+jobs) access the file simultaneously.
+.PP
+The file can be inspected with standard tools:
+.PP
+.RS 4
+.nf
+\fB# Pretty\-print all entries\fR
+jq . ~/.local/state/logwhisperer/patterns.db
+
+\fB# Count patterns\fR
+wc \-l ~/.local/state/logwhisperer/patterns.db
+
+\fB# Find ERROR patterns\fR
+grep '"severity":"ERROR"' ~/.local/state/logwhisperer/patterns.db | jq .
+.fi
+.RE
+.\"
+.\" ===================================================================
+.\"  ENVIRONMENT
+.\" ===================================================================
+.SH ENVIRONMENT
+.TP
+.B XDG_STATE_HOME
+Base directory for state files.
+Default:
+.BR ~/.local/state .
+.TP
+.B LOGWHISPER_NTFY_TOPIC
+Default value for
+.BR \-\-notify\-ntfy\-topic .
+.TP
+.B LOGWHISPER_NTFY_SERVER
+Default value for
+.BR \-\-notify\-ntfy\-server .
+.TP
+.B LOGWHISPER_TELEGRAM_TOKEN
+Default value for
+.BR \-\-notify\-telegram\-token .
+.TP
+.B LOGWHISPER_TELEGRAM_CHAT_ID
+Default value for
+.BR \-\-notify\-telegram\-chat\-id .
+.TP
+.B LOGWHISPER_SMTP_HOST
+Default value for
+.BR \-\-notify\-email\-host .
+.TP
+.B LOGWHISPER_SMTP_PORT
+Default value for
+.BR \-\-notify\-email\-port .
+.TP
+.B LOGWHISPER_SMTP_USER
+Default value for
+.BR \-\-notify\-email\-user .
+.TP
+.B LOGWHISPER_SMTP_PASS
+Default value for
+.BR \-\-notify\-email\-pass .
+.TP
+.B LOGWHISPER_EMAIL_FROM
+Default value for
+.BR \-\-notify\-email\-from .
+.TP
+.B LOGWHISPER_EMAIL_TO
+Default value for
+.BR \-\-notify\-email\-to .
+.\"
+.\" ===================================================================
+.\"  EXIT STATUS
+.\" ===================================================================
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 2
+Invalid arguments, missing source binary, file not found, or invalid
+duration format.
+.\"
+.\" ===================================================================
+.\"  FILES
+.\" ===================================================================
+.SH FILES
+.TP
+.I ~/.local/state/logwhisperer/patterns.db
+Default pattern database (JSON\-lines).
+.TP
+.I ~/.local/state/logwhisperer/baseline.json
+Default baseline learning state (JSON).
+.\"
+.\" ===================================================================
+.\"  EXAMPLES
+.\" ===================================================================
+.SH EXAMPLES
+.SS Basic Usage
+.PP
+Analyse a log file and show sample lines:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-file /var/log/app.log \-\-show\-samples
+.fi
+.RE
+.PP
+Show only never\-before\-seen patterns:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-file /var/log/app.log \-\-show\-new
+.fi
+.RE
+.PP
+Filter to errors only:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-file /var/log/app.log \-\-min\-severity ERROR
+.fi
+.RE
+.SS Docker & Compose
+.PP
+Analyse a Docker container's last 30 minutes of logs:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-docker my\-api \-\-since 30m
+.fi
+.RE
+.PP
+Analyse all Compose services:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-compose\-all \-\-since 1h \-\-show\-new
+.fi
+.RE
+.SS systemd Journal
+.PP
+Analyse today's nginx logs:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-service nginx \-\-since today
+.fi
+.RE
+.SS Baseline Learning
+.PP
+Learn patterns for 24 hours before alerting:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-file /var/log/app.log \-\-baseline\-learn 24h
+.fi
+.RE
+.SS JSON Output
+.PP
+Pipe JSON output to jq for further processing:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-file app.log \-\-json | jq '.items[] | select(.tag == "NEW")'
+.fi
+.RE
+.SS Cron Integration
+.PP
+Check every 5 minutes and alert via ntfy:
+.PP
+.RS 4
+.nf
+*/5 * * * * log\-whisperer \-\-file /var/log/app.log \-\-since 5m \\
+    \-\-notify\-ntfy\-topic my\-alerts 2>>/var/log/lw\-errors.log
+.fi
+.RE
+.SS Multiple Services with Separate Databases
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-docker api    \-\-since 5m \-\-state\-db /var/lib/lw/api.db
+$ log\-whisperer \-\-docker worker \-\-since 5m \-\-state\-db /var/lib/lw/worker.db
+$ log\-whisperer \-\-service nginx \-\-since 5m \-\-state\-db /var/lib/lw/nginx.db
+.fi
+.RE
+.SS CI Smoke Test
+.PP
+Fail if new error patterns are detected:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-file test.log \-\-json \\
+    | jq \-e '[.items[] | select(.tag=="NEW" and .severity=="ERROR")] | length == 0' \\
+    || { echo "New error patterns!"; exit 1; }
+.fi
+.RE
+.SS Notifications
+.PP
+Alert via ntfy and Telegram simultaneously:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-file /var/log/app.log \\
+    \-\-notify\-ntfy\-topic my\-alerts \\
+    \-\-notify\-telegram\-token "123456:ABC\-DEF..." \\
+    \-\-notify\-telegram\-chat\-id "\-100123456789"
+.fi
+.RE
+.PP
+Alert via email:
+.PP
+.RS 4
+.nf
+$ log\-whisperer \-\-file /var/log/app.log \\
+    \-\-notify\-email\-host smtp.company.com \\
+    \-\-notify\-email\-from alerts@company.com \\
+    \-\-notify\-email\-to oncall@company.com
+.fi
+.RE
+.\"
+.\" ===================================================================
+.\"  SEE ALSO
+.\" ===================================================================
+.SH SEE ALSO
+.BR docker\-logs (1),
+.BR journalctl (1),
+.BR jq (1),
+.BR cron (8),
+.BR fcntl (2)
+.\"
+.\" ===================================================================
+.\"  AUTHORS
+.\" ===================================================================
+.SH AUTHORS
+LogWhisperer was created as a lightweight log anomaly detection tool.
+.\"
+.\" ===================================================================
+.\"  BUGS
+.\" ===================================================================
+.SH BUGS
+Report bugs at the project's issue tracker.

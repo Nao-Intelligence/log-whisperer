@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.3] - 2026-02-10
+
+### Changed
+
+- Chore contribution template ([#5](https://github.com/Nao-Intelligence/log-whisperer/pull/5))
+
 ## [0.2.2] - 2026-02-10
 
 ### Changed

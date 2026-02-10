@@ -11,7 +11,7 @@ We recommend always running the latest version.
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in LogWhisperer, **please do not open a public issue.**
+If you discover a security vulnerability in Log Whisperer, **please do not open a public issue.**
 
 Instead, report it privately by emailing **pranto@naointelligence.com** with:
 
@@ -24,4 +24,4 @@ We will acknowledge your report within 48 hours and aim to provide a fix or miti
 
 ## Scope
 
-This policy covers the LogWhisperer CLI tool and its published PyPI package. It does not cover third-party dependencies, though we appreciate reports about vulnerable dependencies as well.
+This policy covers the Log Whisperer CLI tool and its published PyPI package. It does not cover third-party dependencies, though we appreciate reports about vulnerable dependencies as well.

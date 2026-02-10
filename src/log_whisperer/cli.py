@@ -1,4 +1,4 @@
-"""CLI entry point for LogWhisperer.
+"""CLI entry point for Log Whisperer.
 
 Parses arguments, orchestrates the read -> cluster -> report pipeline,
 and dispatches notifications when new patterns are detected.

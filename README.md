@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  LogWhisperer
+  Log Whisperer
   <br>
 </h1>
 
@@ -23,9 +23,9 @@
 
 ---
 
-## What Is LogWhisperer?
+## What Is Log Whisperer?
 
-LogWhisperer reads logs from **multiple sources** (Docker containers, Compose
+Log Whisperer reads logs from **multiple sources** (Docker containers, Compose
 services, systemd journals, plain files), **normalizes** variable data out of
 each line (IPs, UUIDs, timestamps, paths, numbers), and **clusters** them into
 patterns.  It remembers every pattern it has ever seen and tells you which ones
@@ -214,7 +214,7 @@ log-whisperer --service nginx --since today
 
 ### How Normalisation Works
 
-LogWhisperer transforms each raw log line into a **pattern** by replacing
+Log Whisperer transforms each raw log line into a **pattern** by replacing
 variable data with fixed placeholders:
 
 ```
@@ -273,7 +273,7 @@ log-whisperer --file app.log --min-severity ERROR
 
 ## Baseline Learning
 
-When you first deploy LogWhisperer against a service, *every* pattern is new.
+When you first deploy Log Whisperer against a service, *every* pattern is new.
 **Baseline learning** lets the tool silently learn existing patterns for a
 set period before it starts alerting.
 
@@ -358,7 +358,7 @@ log-whisperer --file app.log \
 
 ## Notifications
 
-LogWhisperer can alert you when **new patterns appear** (outside baseline
+Log Whisperer can alert you when **new patterns appear** (outside baseline
 learning mode).  Configure one or more channels:
 
 ### ntfy
@@ -560,7 +560,7 @@ appear in process listings or shell history:
 ### "Command not found: docker"
 
 The Docker or journalctl binary isn't on `$PATH`.  Make sure the relevant tool
-is installed and accessible to the user running LogWhisperer.
+is installed and accessible to the user running Log Whisperer.
 
 ### "Choose exactly one source"
 
@@ -610,5 +610,5 @@ log-whisperer --file /var/log/app.log --baseline-learn 1h
 ---
 
 <p align="center">
-  <sub>LogWhisperer &mdash; Built with Python 3.9+</sub>
+  <sub>Log Whisperer &mdash; Built with Python 3.9+</sub>
 </p>

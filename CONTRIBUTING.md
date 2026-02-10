@@ -1,6 +1,6 @@
-# Contributing to LogWhisperer
+# Contributing to Log Whisperer
 
-Thank you for considering contributing to LogWhisperer! This guide will help you get started.
+Thank you for considering contributing to Log Whisperer! This guide will help you get started.
 
 ## Getting Started
 

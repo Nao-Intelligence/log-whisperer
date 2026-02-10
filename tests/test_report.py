@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.report — text and JSON output formatters.
+"""Tests for log_whisperer.report — text and JSON output formatters.
 
 Validates that ``report_to_json`` produces valid, complete JSON and that
 ``print_text_report`` outputs the expected human-readable sections
@@ -7,7 +7,7 @@ Validates that ``report_to_json`` produces valid, complete JSON and that
 
 import json
 
-from logwhisperer.report import Report, ReportItem, print_text_report, report_to_json
+from log_whisperer.report import Report, ReportItem, print_text_report, report_to_json
 
 
 def _make_report(items=None, baseline_active=False, baseline_until=0):

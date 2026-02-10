@@ -6,9 +6,9 @@
 
 <p align="center">
   <b>CLI log pattern analysis &amp; anomaly detection tool</b><br>
-  <a href="https://pypi.org/project/logwhisperer/"><img src="https://img.shields.io/pypi/v/logwhisperer" alt="PyPI"></a>
-  <a href="https://pypi.org/project/logwhisperer/"><img src="https://img.shields.io/pypi/pyversions/logwhisperer" alt="Python versions"></a>
-  <a href="https://github.com/naointelligence/logwhisperer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/logwhisperer" alt="License"></a>
+  <a href="https://pypi.org/project/log-whisperer/"><img src="https://img.shields.io/pypi/v/log-whisperer" alt="PyPI"></a>
+  <a href="https://pypi.org/project/log-whisperer/"><img src="https://img.shields.io/pypi/pyversions/log-whisperer" alt="Python versions"></a>
+  <a href="https://github.com/Nao-Intelligence/log-whisperer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/log-whisperer" alt="License"></a>
 </p>
 
 <p align="center">
@@ -51,20 +51,20 @@ are **new**.
 ### From PyPI (recommended)
 
 ```bash
-pip install logwhisperer
+pip install log-whisperer
 ```
 
 Or with [pipx](https://pipx.pypa.io/) for an isolated install:
 
 ```bash
-pipx install logwhisperer
+pipx install log-whisperer
 ```
 
 ### From source (development)
 
 ```bash
-git clone https://github.com/naointelligence/logwhisperer.git
-cd logwhisperer
+git clone https://github.com/Nao-Intelligence/log-whisperer.git
+cd log-whisperer
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"

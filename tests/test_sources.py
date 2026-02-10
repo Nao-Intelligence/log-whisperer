@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.sources — file reader and read_lines dispatcher.
+"""Tests for log_whisperer.sources — file reader and read_lines dispatcher.
 
 Validates that ``read_file`` correctly reads the tail of a file and
 handles edge cases (missing files, empty files, fewer lines than the
@@ -9,8 +9,8 @@ source description string.
 
 import pytest
 
-from logwhisperer.sources.file import read_file
-from logwhisperer.sources import read_lines
+from log_whisperer.sources.file import read_file
+from log_whisperer.sources import read_lines
 
 
 # ---------------------------------------------------------------------------
@@ -91,7 +91,7 @@ class TestReadLines:
         Uses monkeypatch to replace ``read_docker`` so no real Docker
         daemon is needed.
         """
-        import logwhisperer.sources as sources_mod
+        import log_whisperer.sources as sources_mod
         # Replace the real reader with a stub that returns canned output
         monkeypatch.setattr(
             sources_mod, "read_docker",
@@ -109,7 +109,7 @@ class TestReadLines:
         Uses monkeypatch to replace ``read_journal`` so no real
         journalctl binary is needed.
         """
-        import logwhisperer.sources as sources_mod
+        import log_whisperer.sources as sources_mod
         # Replace the real reader with a stub that returns canned output
         monkeypatch.setattr(
             sources_mod, "read_journal",

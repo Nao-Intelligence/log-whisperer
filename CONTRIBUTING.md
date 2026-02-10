@@ -7,8 +7,8 @@ Thank you for considering contributing to LogWhisperer! This guide will help you
 ### 1. Fork and clone
 
 ```bash
-git clone https://github.com/<your-username>/logwhisperer.git
-cd logwhisperer
+git clone https://github.com/<your-username>/log-whisperer.git
+cd log-whisperer
 ```
 
 ### 2. Set up the development environment
@@ -77,7 +77,7 @@ chore-update-dependencies
 
 ## Reporting Bugs
 
-Use the [bug report template](https://github.com/naointelligence/logwhisperer/issues/new?template=bug_report.md) to file a bug. Include:
+Use the [bug report template](https://github.com/Nao-Intelligence/log-whisperer/issues/new?template=bug_report.md) to file a bug. Include:
 
 - Steps to reproduce
 - Expected vs. actual behavior
@@ -86,7 +86,7 @@ Use the [bug report template](https://github.com/naointelligence/logwhisperer/is
 
 ## Suggesting Features
 
-Use the [feature request template](https://github.com/naointelligence/logwhisperer/issues/new?template=feature_request.md) to propose new ideas.
+Use the [feature request template](https://github.com/Nao-Intelligence/log-whisperer/issues/new?template=feature_request.md) to propose new ideas.
 
 ## License
 

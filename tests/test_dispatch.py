@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.notify.dispatch — notification fan-out dispatcher.
+"""Tests for log_whisperer.notify.dispatch — notification fan-out dispatcher.
 
 Validates that ``dispatch_notifications`` correctly routes alert messages
 to configured channels (ntfy, Telegram, email), skips unconfigured ones,
@@ -9,7 +9,7 @@ and isolated.
 
 from unittest.mock import patch
 
-from logwhisperer.notify.dispatch import dispatch_notifications
+from log_whisperer.notify.dispatch import dispatch_notifications
 
 
 class TestDispatchNotifications:
@@ -27,7 +27,7 @@ class TestDispatchNotifications:
         should be captured in the failures list with an ``'ntfy'`` prefix."""
         args = make_args(notify_ntfy_topic="test-topic")
         # Mock notify_ntfy to simulate a network error
-        with patch("logwhisperer.notify.dispatch.notify_ntfy", side_effect=Exception("connection error")):
+        with patch("log_whisperer.notify.dispatch.notify_ntfy", side_effect=Exception("connection error")):
             failures = dispatch_notifications(args, "test alert")
         assert len(failures) == 1
         assert "ntfy" in failures[0]
@@ -65,9 +65,9 @@ class TestDispatchNotifications:
         )
         # Mock all three senders to raise
         with (
-            patch("logwhisperer.notify.dispatch.notify_ntfy", side_effect=Exception("ntfy fail")),
-            patch("logwhisperer.notify.dispatch.notify_telegram", side_effect=Exception("tg fail")),
-            patch("logwhisperer.notify.dispatch.notify_email_smtp", side_effect=Exception("email fail")),
+            patch("log_whisperer.notify.dispatch.notify_ntfy", side_effect=Exception("ntfy fail")),
+            patch("log_whisperer.notify.dispatch.notify_telegram", side_effect=Exception("tg fail")),
+            patch("log_whisperer.notify.dispatch.notify_email_smtp", side_effect=Exception("email fail")),
         ):
             failures = dispatch_notifications(args, "test alert")
         # All three channels should have reported a failure
@@ -86,9 +86,9 @@ class TestDispatchNotifications:
         )
         # Mock all three senders to succeed (default mock returns None)
         with (
-            patch("logwhisperer.notify.dispatch.notify_ntfy"),
-            patch("logwhisperer.notify.dispatch.notify_telegram"),
-            patch("logwhisperer.notify.dispatch.notify_email_smtp"),
+            patch("log_whisperer.notify.dispatch.notify_ntfy"),
+            patch("log_whisperer.notify.dispatch.notify_telegram"),
+            patch("log_whisperer.notify.dispatch.notify_email_smtp"),
         ):
             failures = dispatch_notifications(args, "test alert")
         assert failures == []

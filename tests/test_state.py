@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.state — PatternRecord, PatternDB, BaselineState, and helpers.
+"""Tests for log_whisperer.state — PatternRecord, PatternDB, BaselineState, and helpers.
 
 Covers serialization round-trips for PatternRecord, file-backed CRUD
 operations for PatternDB (including malformed-data resilience), baseline
@@ -11,7 +11,7 @@ import time
 
 import pytest
 
-from logwhisperer.state import (
+from log_whisperer.state import (
     PatternRecord,
     PatternDB,
     BaselineState,

@@ -28,6 +28,8 @@ jobs:
 
       - name: Determine version bump
         id: version
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
           # Read current version from pyproject.toml
           CURRENT=$(grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
@@ -36,7 +38,6 @@ jobs:
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
 
           # Extract branch name and its prefix (everything before the first -)
-          BRANCH="${{ github.event.pull_request.head.ref }}"
           PREFIX="${BRANCH%%-*}"
           echo "Branch: $BRANCH"
           echo "Prefix: $PREFIX"
@@ -115,15 +116,17 @@ jobs:
 
           # Build and prepend CHANGELOG.md entry
           DATE=$(date +%Y-%m-%d)
-          CHANGELOG_ENTRY="## [${NEW_VERSION}] - ${DATE}
-
-### ${SECTION}
-
-${ENTRY_LINE}
-"
-          awk -v entry="$CHANGELOG_ENTRY" '
+          {
+            echo "## [${NEW_VERSION}] - ${DATE}"
+            echo ""
+            echo "### ${SECTION}"
+            echo ""
+            echo "${ENTRY_LINE}"
+            echo ""
+          } > /tmp/new_entry.md
+          awk '
             /^## \[/ && !inserted {
-              print entry
+              while ((getline line < "/tmp/new_entry.md") > 0) print line
               inserted=1
             }
             { print }

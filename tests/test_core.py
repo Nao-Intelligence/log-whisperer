@@ -6,13 +6,18 @@ produce NEW/seen tags, and formatted into alert messages for notification
 dispatch.
 """
 
-from log_whisperer.core import cluster, build_report, format_alert_message, WindowPattern
+from log_whisperer.core import (
+    WindowPattern,
+    build_report,
+    cluster,
+    format_alert_message,
+)
 from log_whisperer.report import Report, ReportItem
-from log_whisperer.state import PatternDB, BaselineState
+from log_whisperer.state import BaselineState, PatternDB
 
 
 # ---------------------------------------------------------------------------
-# cluster
+# cluster.
 # ---------------------------------------------------------------------------
 class TestCluster:
     """Verify that ``cluster`` normalizes, deduplicates, and counts raw log lines."""
@@ -60,9 +65,14 @@ class TestBuildReport:
             "h1": WindowPattern(h="h1", pattern="pat <N>", count=2, severity="INFO", sample="pat 1"),
         }
         report, alerted, _ = build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=False, min_severity="INFO",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=False,
+            min_severity="INFO",
         )
         assert len(report.items) == 1
         assert report.items[0].tag == "NEW"
@@ -75,15 +85,25 @@ class TestBuildReport:
         }
         # First run seeds the DB with h1
         build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=False, min_severity="INFO",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=False,
+            min_severity="INFO",
         )
         # Second run should recognise h1 as already known
         report, _, _ = build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=False, min_severity="INFO",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=False,
+            min_severity="INFO",
         )
         assert report.items[0].tag == "seen"
 
@@ -94,9 +114,14 @@ class TestBuildReport:
             "h1": WindowPattern(h="h1", pattern="pat <N>", count=3, severity="INFO", sample="pat 1"),
         }
         build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=False, min_severity="INFO",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=False,
+            min_severity="INFO",
         )
         # Reload DB independently and verify the persisted record
         records = PatternDB(db_path).load()
@@ -111,15 +136,25 @@ class TestBuildReport:
         }
         # First run: h1 is NEW and gets recorded
         build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=False, min_severity="INFO",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=False,
+            min_severity="INFO",
         )
         # Second run with show_new_only: h1 is now "seen" and should be filtered out
         report, _, _ = build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=True, min_severity="INFO",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=True,
+            min_severity="INFO",
         )
         assert len(report.items) == 0
         # The DB total should still accumulate (1 + 1 = 2)
@@ -134,9 +169,14 @@ class TestBuildReport:
             "h2": WindowPattern(h="h2", pattern="error msg", count=1, severity="ERROR", sample="error msg"),
         }
         report, _, _ = build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=False, min_severity="ERROR",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=False,
+            min_severity="ERROR",
         )
         # Only the ERROR pattern should appear in the report
         assert len(report.items) == 1
@@ -154,9 +194,14 @@ class TestBuildReport:
             "h1": WindowPattern(h="h1", pattern="pat <N>", count=1, severity="ERROR", sample="pat 1"),
         }
         _, alerted, baseline_active = build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=False, min_severity="INFO",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=False,
+            min_severity="INFO",
         )
         assert baseline_active is True
         assert len(alerted) == 0
@@ -170,9 +215,14 @@ class TestBuildReport:
             "h3": WindowPattern(h="h3", pattern="mid", count=5, severity="INFO", sample="mid"),
         }
         report, _, _ = build_report(
-            src_desc="test", since="1h", lines_limit=100,
-            db_path=db_path, baseline_path=baseline_path,
-            window=window, show_new_only=False, min_severity="INFO",
+            src_desc="test",
+            since="1h",
+            lines_limit=100,
+            db_path=db_path,
+            baseline_path=baseline_path,
+            window=window,
+            show_new_only=False,
+            min_severity="INFO",
         )
         counts = [it.count_window for it in report.items]
         assert counts == [10, 5, 1]
@@ -187,16 +237,25 @@ class TestFormatAlertMessage:
     def _make_report(self):
         """Helper: build a minimal Report object for alert formatting tests."""
         return Report(
-            source="test:src", since="1h", lines_limit=100,
-            state_db="/tmp/db", baseline_active=False,
-            baseline_until=0, generated_at=0, items=[],
+            source="test:src",
+            since="1h",
+            lines_limit=100,
+            state_db="/tmp/db",
+            baseline_active=False,
+            baseline_until=0,
+            generated_at=0,
+            items=[],
         )
 
     def _make_item(self, pattern="pat", severity="ERROR", count=1):
         """Helper: build a single NEW ReportItem with configurable fields."""
         return ReportItem(
-            tag="NEW", count_window=count, total_seen=count,
-            severity=severity, pattern=pattern, sample=f"raw {pattern}",
+            tag="NEW",
+            count_window=count,
+            total_seen=count,
+            severity=severity,
+            pattern=pattern,
+            sample=f"raw {pattern}",
             hash="h",
         )
 

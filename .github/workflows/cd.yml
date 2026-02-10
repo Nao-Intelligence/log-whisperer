@@ -80,37 +80,60 @@ jobs:
 
       - name: Generate changelog
         id: changelog
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BUMP: ${{ steps.version.outputs.bump }}
+          NEW_VERSION: ${{ steps.version.outputs.new }}
         run: |
-          # Find the latest tag, or use initial commit if none exists
-          if git describe --tags --abbrev=0 HEAD 2>/dev/null; then
-            LAST_TAG=$(git describe --tags --abbrev=0 HEAD)
-            RANGE="${LAST_TAG}..HEAD"
-          else
-            RANGE="HEAD"
-          fi
+          PREFIX="${BRANCH%%-*}"
 
-          echo "Log range: $RANGE"
+          # Map branch prefix to Keep a Changelog section
+          case "$PREFIX" in
+            feat|feature)   SECTION="Added" ;;
+            fix|bugfix|hotfix) SECTION="Fixed" ;;
+            breaking|major) SECTION="Changed" ;;
+            docs)           SECTION="Documentation" ;;
+            perf)           SECTION="Performance" ;;
+            refactor)       SECTION="Changed" ;;
+            *)              SECTION="Changed" ;;
+          esac
 
+          # Use PR title as the changelog entry
+          ENTRY_LINE="- ${PR_TITLE} ([#${PR_NUMBER}](${PR_URL}))"
+
+          # Build GitHub Release notes
           {
             echo "changelog<<CHANGELOG_EOF"
-            echo "## What's Changed"
+            echo "### ${SECTION}"
             echo ""
-            if [ "$RANGE" = "HEAD" ]; then
-              git log --pretty=format:"- %s (%an)" HEAD
-            else
-              git log --pretty=format:"- %s (%an)" "$RANGE"
-            fi
-            echo ""
-            echo ""
-            echo "**Full Changelog**: ${{ github.event.pull_request.html_url }}"
+            echo "${ENTRY_LINE}"
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
+
+          # Build and prepend CHANGELOG.md entry
+          DATE=$(date +%Y-%m-%d)
+          CHANGELOG_ENTRY="## [${NEW_VERSION}] - ${DATE}
+
+### ${SECTION}
+
+${ENTRY_LINE}
+"
+          awk -v entry="$CHANGELOG_ENTRY" '
+            /^## \[/ && !inserted {
+              print entry
+              inserted=1
+            }
+            { print }
+          ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
 
       - name: Commit version bump and create tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pyproject.toml src/logwhisperer/__init__.py
+          git add pyproject.toml src/logwhisperer/__init__.py CHANGELOG.md
           git commit -m "chore: bump version to ${{ steps.version.outputs.new }}"
           git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.tag }}"
           git push origin main --follow-tags

@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug to help us improve LogWhisperer
+about: Report a bug to help us improve Log Whisperer
 title: ""
 labels: bug
 assignees: ""
@@ -30,7 +30,7 @@ What actually happened. Include any error messages or unexpected output.
 
 - OS: [e.g. Ubuntu 24.04, macOS 15]
 - Python version: [e.g. 3.13]
-- LogWhisperer version: [e.g. 0.2.0 — run `log-whisperer --help` or `pip show log-whisperer`]
+- Log Whisperer version: [e.g. 0.2.0 — run `log-whisperer --help` or `pip show log-whisperer`]
 - Log source used: [e.g. --file, --docker, --service]
 
 ## Additional Context

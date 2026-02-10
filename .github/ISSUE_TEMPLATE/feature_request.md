@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest an idea for LogWhisperer
+about: Suggest an idea for Log Whisperer
 title: ""
 labels: enhancement
 assignees: ""

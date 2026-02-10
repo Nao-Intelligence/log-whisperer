@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for the LogWhisperer test suite.
+"""Shared pytest fixtures for the Log Whisperer test suite.
 
 Provides reusable temporary directories, file paths, sample data, and
 argument factories so individual test modules stay focused on assertions

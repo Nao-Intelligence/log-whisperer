@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.cli — argument parsing and end-to-end integration.
+"""Tests for log_whisperer.cli — argument parsing and end-to-end integration.
 
 Validates that ``parse_args`` enforces source-selection rules, parses
 typed arguments correctly, and applies sensible defaults.  Integration
@@ -10,7 +10,7 @@ import json
 
 import pytest
 
-from logwhisperer.cli import parse_args, main
+from log_whisperer.cli import parse_args, main
 
 
 # ---------------------------------------------------------------------------

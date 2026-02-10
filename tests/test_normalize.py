@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.normalize — line normalization and pattern hashing.
+"""Tests for log_whisperer.normalize — line normalization and pattern hashing.
 
 Validates that ``normalize_line`` correctly strips timestamp prefixes and
 replaces variable tokens (UUIDs, hashes, IPs, MACs, hex literals, paths,
@@ -6,7 +6,7 @@ bare numbers) with stable placeholders.  Also verifies that
 ``pattern_hash`` produces consistent, collision-resistant SHA-1 digests.
 """
 
-from logwhisperer.normalize import normalize_line, pattern_hash
+from log_whisperer.normalize import normalize_line, pattern_hash
 
 
 class TestNormalizeLine:

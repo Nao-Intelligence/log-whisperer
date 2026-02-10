@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.sources._subprocess — shared subprocess helper.
+"""Tests for log_whisperer.sources._subprocess — shared subprocess helper.
 
 Validates that ``run_cmd`` correctly captures stdout from successful
 commands, raises ``RuntimeError`` with descriptive messages for missing
@@ -7,7 +7,7 @@ binaries and non-zero exits, and handles empty output gracefully.
 
 import pytest
 
-from logwhisperer.sources._subprocess import run_cmd
+from log_whisperer.sources._subprocess import run_cmd
 
 
 class TestRunCmd:

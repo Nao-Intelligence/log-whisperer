@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.core — cluster, build_report, and format_alert_message.
+"""Tests for log_whisperer.core — cluster, build_report, and format_alert_message.
 
 Validates the core analysis pipeline: raw log lines are clustered into
 deduplicated patterns, diffed against the persistent pattern DB to
@@ -6,9 +6,9 @@ produce NEW/seen tags, and formatted into alert messages for notification
 dispatch.
 """
 
-from logwhisperer.core import cluster, build_report, format_alert_message, WindowPattern
-from logwhisperer.report import Report, ReportItem
-from logwhisperer.state import PatternDB, BaselineState
+from log_whisperer.core import cluster, build_report, format_alert_message, WindowPattern
+from log_whisperer.report import Report, ReportItem
+from log_whisperer.state import PatternDB, BaselineState
 
 
 # ---------------------------------------------------------------------------

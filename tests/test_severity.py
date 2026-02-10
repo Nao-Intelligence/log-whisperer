@@ -1,4 +1,4 @@
-"""Tests for logwhisperer.severity — keyword-based severity classification.
+"""Tests for log_whisperer.severity — keyword-based severity classification.
 
 Validates that ``severity_of`` correctly classifies log lines as
 ``"ERROR"``, ``"WARN"``, or ``"INFO"`` based on the presence of known
@@ -7,7 +7,7 @@ keywords, with proper case-insensitivity and precedence rules.
 
 import pytest
 
-from logwhisperer.severity import severity_of, ERROR_HINTS, WARN_HINTS
+from log_whisperer.severity import severity_of, ERROR_HINTS, WARN_HINTS
 
 
 class TestSeverityOf:

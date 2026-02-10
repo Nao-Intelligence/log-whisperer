@@ -4,11 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "log-whisperer"
-<<<<<<< HEAD
 version = "0.2.4"
-=======
-version = "0.2.5"
->>>>>>> main
 description = "CLI log pattern analysis and anomaly detection tool"
 requires-python = ">=3.9"
 dependencies = ["requests"]

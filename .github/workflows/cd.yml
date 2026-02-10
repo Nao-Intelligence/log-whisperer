@@ -112,7 +112,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pyproject.toml src/logwhisperer/__init__.py
           git commit -m "chore: bump version to ${{ steps.version.outputs.new }}"
-          git tag "${{ steps.version.outputs.tag }}"
+          git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.tag }}"
           git push origin main --follow-tags
 
       - name: Build package

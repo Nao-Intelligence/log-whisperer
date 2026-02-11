@@ -37,7 +37,6 @@ your-project/
 │       │   └── 00_logwhisperer_cleanup.sh
 │       └── postdeploy/
 │           └── 99_logwhisperer_setup.sh
-├── Dockerrun.aws.json (or Dockerfile)
 └── ...
 ```
 

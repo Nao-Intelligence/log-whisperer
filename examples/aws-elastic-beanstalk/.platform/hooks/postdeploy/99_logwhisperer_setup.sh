@@ -10,7 +10,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 
 # Source EB environment variables
-if [ -f /opt/elasticbeanstalk/deployment/env.json ]; then
+if [ -f /opt/elasticbeanstalk/deployment/env.json ] && command -v jq >/dev/null 2>&1; then
   eval "$(jq -r 'to_entries|map("export \(.key)=\(.value|@sh)")|.[]' \
     /opt/elasticbeanstalk/deployment/env.json)"
 elif [ -f /opt/elasticbeanstalk/deployment/env ]; then
@@ -35,7 +35,8 @@ command -v pip3 >/dev/null 2>&1 || {
   echo "[log-whisperer] pip3 not found, installing..."
   dnf install -y python3-pip
 }
-pip3 install --upgrade log-whisperer
+pip3 install --upgrade --break-system-packages log-whisperer 2>/dev/null \
+  || pip3 install --upgrade log-whisperer
 
 # ── Resolve role ───────────────────────────────────────────────────────────
 ROLE="${APP_ROLE:-unknown}"
@@ -45,22 +46,23 @@ echo "[log-whisperer] Detected APP_ROLE=${ROLE}"
 # EB deployment env files are cleaned up after hooks finish, so the cron job
 # can't read them at runtime. Save the relevant vars to a persistent file.
 mkdir -p /opt/logwhisperer
+# Values are single-quoted to safely handle special characters in passwords etc.
 cat > /opt/logwhisperer/env << ENVFILE
-APP_ROLE=${ROLE}
-LOG_WHISPERER_ENABLED=${LOG_WHISPERER_ENABLED:-false}
-LOG_WHISPERER_CRON_INTERVAL=${LOG_WHISPERER_CRON_INTERVAL:-15}
-LOG_WHISPERER_MIN_SEVERITY=${LOG_WHISPERER_MIN_SEVERITY:-WARN}
-LOG_WHISPERER_BASELINE_MINUTES=${LOG_WHISPERER_BASELINE_MINUTES:-30}
-LOG_WHISPERER_NTFY_TOPIC=${LOG_WHISPERER_NTFY_TOPIC:-}
-LOG_WHISPERER_NTFY_URL=${LOG_WHISPERER_NTFY_URL:-}
-LOG_WHISPERER_TELEGRAM_TOKEN=${LOG_WHISPERER_TELEGRAM_TOKEN:-}
-LOG_WHISPERER_TELEGRAM_CHAT=${LOG_WHISPERER_TELEGRAM_CHAT:-}
-LOG_WHISPERER_EMAIL_TO=${LOG_WHISPERER_EMAIL_TO:-}
-LOG_WHISPERER_EMAIL_FROM=${LOG_WHISPERER_EMAIL_FROM:-}
-LOG_WHISPERER_SMTP_HOST=${LOG_WHISPERER_SMTP_HOST:-}
-LOG_WHISPERER_SMTP_PORT=${LOG_WHISPERER_SMTP_PORT:-}
-LOG_WHISPERER_SMTP_USER=${LOG_WHISPERER_SMTP_USER:-}
-LOG_WHISPERER_SMTP_PASSWORD=${LOG_WHISPERER_SMTP_PASSWORD:-}
+APP_ROLE='${ROLE}'
+LOG_WHISPERER_ENABLED='${LOG_WHISPERER_ENABLED:-false}'
+LOG_WHISPERER_CRON_INTERVAL='${LOG_WHISPERER_CRON_INTERVAL:-15}'
+LOG_WHISPERER_MIN_SEVERITY='${LOG_WHISPERER_MIN_SEVERITY:-WARN}'
+LOG_WHISPERER_BASELINE_MINUTES='${LOG_WHISPERER_BASELINE_MINUTES:-30}'
+LOG_WHISPERER_NTFY_TOPIC='${LOG_WHISPERER_NTFY_TOPIC:-}'
+LOG_WHISPERER_NTFY_URL='${LOG_WHISPERER_NTFY_URL:-}'
+LOG_WHISPERER_TELEGRAM_TOKEN='${LOG_WHISPERER_TELEGRAM_TOKEN:-}'
+LOG_WHISPERER_TELEGRAM_CHAT='${LOG_WHISPERER_TELEGRAM_CHAT:-}'
+LOG_WHISPERER_EMAIL_TO='${LOG_WHISPERER_EMAIL_TO:-}'
+LOG_WHISPERER_EMAIL_FROM='${LOG_WHISPERER_EMAIL_FROM:-}'
+LOG_WHISPERER_SMTP_HOST='${LOG_WHISPERER_SMTP_HOST:-}'
+LOG_WHISPERER_SMTP_PORT='${LOG_WHISPERER_SMTP_PORT:-}'
+LOG_WHISPERER_SMTP_USER='${LOG_WHISPERER_SMTP_USER:-}'
+LOG_WHISPERER_SMTP_PASSWORD='${LOG_WHISPERER_SMTP_PASSWORD:-}'
 ENVFILE
 chmod 600 /opt/logwhisperer/env
 
@@ -93,7 +95,7 @@ STATE_DB="/opt/logwhisperer/state/${ROLE}/patterns.db"
 BASELINE_STATE="/opt/logwhisperer/state/${ROLE}/baseline"
 LOG_TAG="log-whisperer[${ROLE}]"
 
-# ── Find the app container (same logic as 01_release.sh) ──────────────────
+# ── Find the app container ─────────────────────────────────────────────────
 CID=$(docker ps -q -f "name=^/app$" | head -n1 || true)
 [ -z "$CID" ] && CID=$(docker ps -q -f "publish=80" | head -n1 || true)
 [ -z "$CID" ] && CID=$(docker ps -q -f "ancestor=aws_beanstalk/current-app:latest" | head -n1 || true)

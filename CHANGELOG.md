@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.10] - 2026-02-11
+
+### Changed
+
+- Fix example Scripts updated ([#13](https://github.com/Nao-Intelligence/log-whisperer/pull/13))
+
 ## [0.2.9] - 2026-02-11
 
 ### Changed

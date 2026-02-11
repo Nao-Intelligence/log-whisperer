@@ -9,15 +9,14 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-
 from pathlib import Path
 
-from .paths import default_state_dir
-from .sources import read_lines
-from .core import cluster, build_report, format_alert_message
-from .report import print_text_report, report_to_json
+from .core import build_report, cluster, format_alert_message
 from .notify.dispatch import dispatch_notifications
-from .state import BaselineState, PatternDB, parse_duration, fmt_local_ts
+from .paths import default_state_dir
+from .report import print_text_report, report_to_json
+from .sources import read_lines
+from .state import BaselineState, PatternDB, fmt_local_ts, parse_duration
 
 
 def parse_args(argv=None) -> argparse.Namespace:

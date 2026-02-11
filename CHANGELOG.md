@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.8] - 2026-02-11
+
+### Changed
+
+- fix: capture stderr from docker and compose log commands ([#11](https://github.com/Nao-Intelligence/log-whisperer/pull/11))
+
 ## [0.2.7] - 2026-02-10
 
 ### Changed
